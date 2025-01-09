@@ -1,0 +1,10 @@
+POST http://localhost:5297/pokemon
+Content-Type: application/json
+
+{
+  "id": "",
+  "name": "",
+  "type": "",
+  "ability": "",
+  "level": "0"
+}

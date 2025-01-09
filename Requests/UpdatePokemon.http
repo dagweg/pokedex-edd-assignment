@@ -1,0 +1,8 @@
+@id = 2
+
+PATCH http://localhost:5297/pokemon/{{id}}
+Content-Type: application/json
+
+{
+  "level": 100
+}

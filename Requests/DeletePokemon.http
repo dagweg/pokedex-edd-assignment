@@ -1,0 +1,4 @@
+@id = 2
+
+DELETE http://localhost:5297/pokemon/{{id}}
+Content-Type: application/json
