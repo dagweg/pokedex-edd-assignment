@@ -3,120 +3,127 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using pokedex.Models;
+using pokedex.Services.MongoDB;
 
 namespace pokedex.Services
 {
     public class PokemonService : IPokemonService
     {
-        // In-memory list of pokemons (will get replaced by a database)
-        static List<Pokemon> pokemons = new List<Pokemon>()
+        private readonly IPokemonContext _pokemonContext;
+
+        public PokemonService(IPokemonContext pokemonContext)
         {
-            new Pokemon()
-            {
-                Id = "1",
-                Name = "Pikachu",
-                Type = "Electric",
-                Ability = "Static",
-                Level = 50,
-            },
-            new Pokemon()
-            {
-                Id = "2",
-                Name = "Charmander",
-                Type = "Fire",
-                Ability = "Blaze",
-                Level = 50,
-            },
-            new Pokemon()
-            {
-                Id = "3",
-                Name = "Squirtle",
-                Type = "Water",
-                Ability = "Torrent",
-                Level = 50,
-            },
-            new Pokemon()
-            {
-                Id = "4",
-                Name = "Bulbasaur",
-                Type = "Grass",
-                Ability = "Overgrow",
-                Level = 50,
-            },
-        };
+            _pokemonContext = pokemonContext;
+        }
 
         public async Task<List<Pokemon>> GetPokemonsAsync()
         {
-            await Task.CompletedTask; // delete when using async db call
-
-            return pokemons;
+            try
+            {
+                return await _pokemonContext.GetAllAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
         }
 
         public async Task<Pokemon> GetPokemonByIdAsync(string id)
         {
-            await Task.CompletedTask; // delete when using async db call
-
-            var pokemon = pokemons.FirstOrDefault(pokemon => pokemon.Id == id);
-            if (pokemon == null)
+            try
             {
-                throw new KeyNotFoundException("Pokemon not found");
+                var pokemon = await _pokemonContext.GetAsync(id);
+                if (pokemon == null)
+                {
+                    throw new KeyNotFoundException("Pokemon not found");
+                }
+                return pokemon;
             }
-            return pokemon;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
         }
 
-        public async Task<Pokemon> GetPokemonByNameAsync(string name)
+        public async Task<List<Pokemon>> GetPokemonByNameAsync(string name)
         {
-            await Task.CompletedTask; // delete when using async db call
-
-            var pokemon = pokemons.FirstOrDefault(pokemon => pokemon.Name == name);
-            if (pokemon == null)
+            try
             {
-                throw new KeyNotFoundException("Pokemon not found");
+                var pokemon = await _pokemonContext.GetPokemonByNameAsync(name);
+                if (pokemon == null)
+                {
+                    throw new KeyNotFoundException("Pokemon not found");
+                }
+                return pokemon;
             }
-            return pokemon;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
         }
 
         public async Task<Pokemon> AddPokemonAsync(Pokemon newPokemon)
         {
-            await Task.CompletedTask; // delete when using async db call
+            try
+            {
+                newPokemon.Id = Guid.NewGuid().ToString();
 
-            Guid id = Guid.NewGuid();
-            newPokemon.Id = id.ToString();
+                await _pokemonContext.CreateAsync(newPokemon);
 
-            pokemons.Add(newPokemon);
-
-            return newPokemon;
+                return newPokemon;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
         }
 
         public async Task<Pokemon> UpdatePokemonAsync(string id, Pokemon updatedPokemon)
         {
-            await Task.CompletedTask; // delete when using async db call
-
-            var index = pokemons.FindIndex(pokemon => pokemon.Id == id);
-            if (index == -1)
+            try
             {
-                throw new KeyNotFoundException("Pokemon not found");
-            }
-            pokemons[index].Id = updatedPokemon.Id ?? pokemons[index].Id;
-            pokemons[index].Name = updatedPokemon.Name ?? pokemons[index].Name;
-            pokemons[index].Type = updatedPokemon.Type ?? pokemons[index].Type;
-            pokemons[index].Ability = updatedPokemon.Ability ?? pokemons[index].Ability;
-            pokemons[index].Level = updatedPokemon.Level ?? pokemons[index].Level;
+                var pokemon = await _pokemonContext.GetAsync(id);
+                if (pokemon is null)
+                {
+                    throw new KeyNotFoundException("Pokemon not found");
+                }
+                pokemon.Id = updatedPokemon.Id ?? pokemon.Id;
+                pokemon.Name = updatedPokemon.Name ?? pokemon.Name;
+                pokemon.Type = updatedPokemon.Type ?? pokemon.Type;
+                pokemon.Ability = updatedPokemon.Ability ?? pokemon.Ability;
+                pokemon.Level = updatedPokemon.Level ?? pokemon.Level;
 
-            return pokemons[index];
+                await _pokemonContext.UpdateAsync(id, pokemon);
+
+                return pokemon;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
         }
 
         public async Task<bool> DeletePokemonAsync(string id)
         {
-            await Task.CompletedTask; // delete when using async db call
-
-            var pokemon = pokemons.FirstOrDefault(pokemon => pokemon.Id == id);
-            if (pokemon == null)
+            try
             {
-                throw new KeyNotFoundException("Pokemon not found");
+                var pokemon = await _pokemonContext.DeleteAsync(id);
+                if (pokemon is false)
+                {
+                    throw new KeyNotFoundException("Pokemon not found");
+                }
+                return true;
             }
-            pokemons.Remove(pokemon);
-            return true;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
         }
     }
 }
