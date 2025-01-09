@@ -32,11 +32,11 @@ public class ErrorHandlingMiddleware
 
             await context.Response.WriteAsJsonAsync(problemDetails);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             var problemDetails = new ProblemDetails
             {
-                Type = "InternalServerFailure",
+                Type = ex.Source,
                 Title = "InternalServer Error",
                 Detail = "An internal server error has occured",
                 Extensions = { { "traceId", context.TraceIdentifier } },
