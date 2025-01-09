@@ -36,8 +36,8 @@ namespace pokedex.Controllers
         [HttpGet("search/{name}")]
         public async Task<ActionResult> GetPokemonByName(string name)
         {
-            var pokemon = await _pokemonService.GetPokemonByNameAsync(name);
-            return Ok(pokemon);
+            var pokemons = await _pokemonService.GetPokemonByNameAsync(name);
+            return Ok(pokemons);
         }
 
         [HttpPost]
