@@ -1,3 +1,1 @@
-@name = Squirtle
-
-GET http://localhost:5297/pokemon/search/{{name}}
+GET http://localhost:5297/pokemon/search/c
